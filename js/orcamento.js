@@ -31,7 +31,7 @@
     currentQuote: null,
 
     async init() {
-      // Limpar qualquer dado legado/demonstrativo do cache local do navegador
+      // Limpar qualquer dado demonstrativo antigo do cache local
       let savedProdsStr = localStorage.getItem('rr_products');
       if (savedProdsStr && (savedProdsStr.includes('prod_1') || savedProdsStr.includes('Assessoria Visto'))) {
         localStorage.removeItem('rr_products');
@@ -58,21 +58,25 @@
       if (!supabaseClient) return;
       try {
         const { data: cloudProds, error: pErr } = await supabaseClient.from('rr_products').select('*');
-        if (!pErr && cloudProds) {
-          // Filtrar produtos antigos de teste se houver
+        if (pErr) {
+          console.warn('Erro ao buscar produtos no Supabase:', pErr);
+        } else if (cloudProds) {
           this.products = cloudProds.filter(p => p.id && !p.id.startsWith('prod_'));
           localStorage.setItem('rr_products', JSON.stringify(this.products));
         }
 
         const { data: cloudSellers, error: sErr } = await supabaseClient.from('rr_sellers').select('*');
-        if (!sErr && cloudSellers) {
-          // Filtrar vendedores antigos de teste se houver
+        if (sErr) {
+          console.warn('Erro ao buscar vendedores no Supabase:', sErr);
+        } else if (cloudSellers) {
           this.sellers = cloudSellers.filter(s => s.id && !s.id.startsWith('sell_'));
           localStorage.setItem('rr_sellers', JSON.stringify(this.sellers));
         }
 
         const { data: cloudQuotes, error: qErr } = await supabaseClient.from('rr_quotes').select('*').order('created_at', { ascending: false });
-        if (!qErr && cloudQuotes) {
+        if (qErr) {
+          console.warn('Erro ao buscar orçamentos no Supabase:', qErr);
+        } else if (cloudQuotes) {
           this.quotesHistory = cloudQuotes.map(q => typeof q.data === 'string' ? JSON.parse(q.data) : (q.data || q));
           localStorage.setItem('rr_quotes', JSON.stringify(this.quotesHistory));
         }
@@ -82,7 +86,7 @@
         renderSellersList();
         renderHistory();
       } catch (err) {
-        console.warn('Erro ao sincronizar do Supabase Cloud:', err);
+        console.warn('Erro na sincronização Supabase:', err);
       }
     },
 
@@ -90,8 +94,14 @@
       localStorage.setItem('rr_products', JSON.stringify(this.products));
       if (supabaseClient) {
         try {
-          await supabaseClient.from('rr_products').upsert(this.products);
-        } catch (e) { console.warn('Erro no upload de produto:', e); }
+          const { error } = await supabaseClient.from('rr_products').upsert(this.products);
+          if (error) {
+            console.error('Erro Supabase Produtos:', error);
+            alert('Aviso do Supabase ao salvar produto: ' + error.message);
+          }
+        } catch (e) {
+          console.error('Erro no upload de produto:', e);
+        }
       }
     },
 
@@ -99,8 +109,14 @@
       localStorage.setItem('rr_sellers', JSON.stringify(this.sellers));
       if (supabaseClient) {
         try {
-          await supabaseClient.from('rr_sellers').upsert(this.sellers);
-        } catch (e) { console.warn('Erro no upload de vendedor:', e); }
+          const { error } = await supabaseClient.from('rr_sellers').upsert(this.sellers);
+          if (error) {
+            console.error('Erro Supabase Vendedores:', error);
+            alert('Aviso do Supabase ao salvar vendedor: ' + error.message);
+          }
+        } catch (e) {
+          console.error('Erro no upload de vendedor:', e);
+        }
       }
     },
 
@@ -108,8 +124,14 @@
       localStorage.setItem('rr_quotes', JSON.stringify(this.quotesHistory));
       if (supabaseClient && this.currentQuote) {
         try {
-          await supabaseClient.from('rr_quotes').upsert([{ id: this.currentQuote.id, data: this.currentQuote, created_at: this.currentQuote.date }]);
-        } catch (e) { console.warn('Erro no upload do orçamento:', e); }
+          const { error } = await supabaseClient.from('rr_quotes').upsert([{ id: this.currentQuote.id, data: this.currentQuote, created_at: this.currentQuote.date }]);
+          if (error) {
+            console.error('Erro Supabase Orçamento:', error);
+            alert('Aviso do Supabase ao salvar orçamento: ' + error.message);
+          }
+        } catch (e) {
+          console.error('Erro no upload do orçamento:', e);
+        }
       }
     }
   };
