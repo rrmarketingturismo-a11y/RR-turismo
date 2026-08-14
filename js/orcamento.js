@@ -8,7 +8,7 @@
   // --- CONFIGURAÇÃO DO SUPABASE CLOUD (SINCRONIZAÇÃO EM TEMPO REAL) ---
   // Insira a URL e a Anon Key do seu projeto Supabase abaixo:
   const SUPABASE_URL = 'https://uyylbgyxbhppkhdjgoxq.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_WUH3JoVUU9dNLb1NH_AxRQ_I1c6E';
+  const SUPABASE_ANON_KEY = 'sb_publishable_WUH3JoVUU9dNLbiMH_AxRQ_Iic6ESqz';
 
   let supabaseClient = null;
   if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY) {
