@@ -7,7 +7,7 @@
 
   // --- CONFIGURAÇÃO DO SUPABASE CLOUD (SINCRONIZAÇÃO EM TEMPO REAL) ---
   const SUPABASE_URL = 'https://uyylbgyxbhppkhdjgoxq.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_WUH3JoVUU9dNLbiMH_AxRQ_Iic6ESqz';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5eWxiZ3l4YmhwcGtoZGpnb3hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY3MDk4NTQsImV4cCI6MjEwMjI4NTg1NH0.k3Ao_eZP_4RZ08cwuap21EsHN0p-YoYkWZGJJRF6oA0';
 
   let supabaseClient = null;
   if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY) {
@@ -18,7 +18,7 @@
     }
   }
 
-  // --- DADOS INICIAIS (CATÁLOGO ZERADO) ---
+  // --- DADOS INICIAIS (100% ZERADOS) ---
   const DEFAULT_PRODUCTS = [];
   const DEFAULT_SELLERS = [];
 
@@ -31,11 +31,20 @@
     currentQuote: null,
 
     async init() {
-      const savedProds = localStorage.getItem('rr_products');
-      this.products = savedProds ? JSON.parse(savedProds) : [];
+      // Limpar qualquer dado legado/demonstrativo do cache local do navegador
+      let savedProdsStr = localStorage.getItem('rr_products');
+      if (savedProdsStr && (savedProdsStr.includes('prod_1') || savedProdsStr.includes('Assessoria Visto'))) {
+        localStorage.removeItem('rr_products');
+        savedProdsStr = null;
+      }
+      this.products = savedProdsStr ? JSON.parse(savedProdsStr) : [];
 
-      const savedSellers = localStorage.getItem('rr_sellers');
-      this.sellers = savedSellers ? JSON.parse(savedSellers) : [];
+      let savedSellersStr = localStorage.getItem('rr_sellers');
+      if (savedSellersStr && (savedSellersStr.includes('sell_1') || savedSellersStr.includes('Rodrigo Rodrigues'))) {
+        localStorage.removeItem('rr_sellers');
+        savedSellersStr = null;
+      }
+      this.sellers = savedSellersStr ? JSON.parse(savedSellersStr) : [];
 
       const savedQuotes = localStorage.getItem('rr_quotes');
       this.quotesHistory = savedQuotes ? JSON.parse(savedQuotes) : [];
@@ -50,13 +59,15 @@
       try {
         const { data: cloudProds, error: pErr } = await supabaseClient.from('rr_products').select('*');
         if (!pErr && cloudProds) {
-          this.products = cloudProds;
+          // Filtrar produtos antigos de teste se houver
+          this.products = cloudProds.filter(p => p.id && !p.id.startsWith('prod_'));
           localStorage.setItem('rr_products', JSON.stringify(this.products));
         }
 
         const { data: cloudSellers, error: sErr } = await supabaseClient.from('rr_sellers').select('*');
         if (!sErr && cloudSellers) {
-          this.sellers = cloudSellers;
+          // Filtrar vendedores antigos de teste se houver
+          this.sellers = cloudSellers.filter(s => s.id && !s.id.startsWith('sell_'));
           localStorage.setItem('rr_sellers', JSON.stringify(this.sellers));
         }
 
@@ -820,7 +831,7 @@
       if (!name || isNaN(price)) return;
 
       const newProd = {
-        id: 'prod_' + Date.now(),
+        id: 'real_prod_' + Date.now(),
         name,
         category,
         price,
@@ -868,7 +879,7 @@
       if (!name) return;
 
       const newSeller = {
-        id: 'sell_' + Date.now(),
+        id: 'real_sell_' + Date.now(),
         name,
         role: role || 'Consultor',
         phone,
