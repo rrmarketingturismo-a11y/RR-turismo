@@ -700,32 +700,51 @@
     return `ORCAMENTO RR TURISMO - ORCAMENTO ${code} - CLIENTE ${clientName}`;
   }
 
-  // --- DOWNLOAD DIRETO DO PDF NO NAVEGADOR ---
-  function downloadPdfDirectly() {
+  // --- DOWNLOAD DIRETO OU IMPRESSÃO COM NOME PERSONALIZADO DO CLIENTE ---
+  async function downloadPdfDirectly() {
     if (!AppState.currentQuote) return;
     const q = AppState.currentQuote;
-    const filename = buildPdfFilename(q) + '.pdf';
+    const filename = buildPdfFilename(q);
+    const originalTitle = document.title;
 
-    const element = DOM.quotePaperContent.querySelector('.quote-paper') || DOM.quotePaperContent;
+    // Define o título da página para a caixa de Salvar em PDF usar como nome padrão
+    document.title = filename;
+
+    const paperEl = DOM.quotePaperContent.querySelector('.quote-paper') || DOM.quotePaperContent;
 
     if (typeof window.html2pdf !== 'undefined') {
-      const opt = {
-        margin:       [6, 6, 6, 6],
-        filename:     filename,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-      window.html2pdf().set(opt).from(element).save();
-    } else {
-      triggerIsolatedPrint();
+      try {
+        const opt = {
+          margin:       [4, 4, 4, 4],
+          filename:     filename + '.pdf',
+          image:        { type: 'jpeg', quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true, allowTaint: true },
+          jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        const pdfPromise = window.html2pdf().set(opt).from(paperEl).save();
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout html2pdf')), 2200)
+        );
+
+        await Promise.race([pdfPromise, timeoutPromise]);
+        setTimeout(() => { document.title = originalTitle; }, 3000);
+        return;
+      } catch (e) {
+        console.warn('html2pdf fallback acionado:', e);
+      }
     }
+
+    // Se o html2pdf demorar ou falhar no navegador local, ativa a impressão PDF com o título padronizado
+    triggerIsolatedPrint();
   }
 
   function triggerIsolatedPrint() {
     if (!AppState.currentQuote) return;
     const q = AppState.currentQuote;
     const originalTitle = document.title;
+
+    // Garante que o navegador sugira o nome exato do arquivo no Salvar como PDF
     document.title = buildPdfFilename(q);
     
     DOM.printArea.innerHTML = DOM.quotePaperContent.innerHTML;
@@ -734,7 +753,7 @@
     setTimeout(() => {
       DOM.printArea.innerHTML = '';
       document.title = originalTitle;
-    }, 1000);
+    }, 2000);
   }
 
   function sendToWhatsapp() {
