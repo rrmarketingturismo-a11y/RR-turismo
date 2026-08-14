@@ -6,7 +6,6 @@
   'use strict';
 
   // --- CONFIGURAÇÃO DO SUPABASE CLOUD (SINCRONIZAÇÃO EM TEMPO REAL) ---
-  // Insira a URL e a Anon Key do seu projeto Supabase abaixo:
   const SUPABASE_URL = 'https://uyylbgyxbhppkhdjgoxq.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_WUH3JoVUU9dNLbiMH_AxRQ_Iic6ESqz';
 
@@ -19,25 +18,9 @@
     }
   }
 
-  // --- DADOS INICIAIS DE FÁBRICA (SEED DATA) ---
-  const DEFAULT_PRODUCTS = [
-    { id: 'prod_1', name: 'Assessoria Visto Procura de Trabalho - Portugal', category: 'Vistos & Imigração', price: 3500.00, desc: 'Montagem de dossiê, agendamento consular e suporte documental.' },
-    { id: 'prod_2', name: 'Assessoria Visto D2 (Empreendedor) / D7 (Rendimentos)', category: 'Vistos & Imigração', price: 4800.00, desc: 'Elaboração de dossiê financeiro/plano de negócios e acompanhamento consular.' },
-    { id: 'prod_3', name: 'Combo NIF + NISS + Abertura de Conta Bancária', category: 'Documentação', price: 1200.00, desc: 'Obtenção de NIF, NISS e conta em Portugal com representante fiscal.' },
-    { id: 'prod_4', name: 'Emissão e Validação de PB4 (CDAM)', category: 'Documentação', price: 450.00, desc: 'Certificado de saúde Brasil/Portugal junto ao Ministério da Saúde.' },
-    { id: 'prod_5', name: 'Apostilamento de Haia (Por Documento)', category: 'Documentação', price: 180.00, desc: 'Apostilamento de certidões para validade legal internacional.' },
-    { id: 'prod_6', name: 'Reserva Otimizada de Passagem Aérea', category: 'Passagens', price: 350.00, desc: 'Pesquisa tarifária inteligente e emissão de reserva confirmada.' },
-    { id: 'prod_7', name: 'Translado VIP Aeroporto (Lisboa/Porto)', category: 'Recepção', price: 280.00, desc: 'Recepção no desembarque com motorista privativo até a acomodação.' },
-    { id: 'prod_8', name: 'Seguro Viagem Internacional (€30.000)', category: 'Seguros', price: 320.00, desc: 'Seguro obrigatório Tratado de Schengen com cobertura médica.' },
-    { id: 'prod_9', name: 'Assessoria de Acomodação / Carta Convite', category: 'Hospedagem', price: 650.00, desc: 'Arrendamento residencial temporário ou termo de responsabilidade.' },
-    { id: 'prod_10', name: 'Pacote Imigração Europa Completo VIP', category: 'Pacotes VIP', price: 5900.00, desc: 'Solução 360º: Visto + NIF/NISS + Conta + Voo + Suporte na chegada.' }
-  ];
-
-  const DEFAULT_SELLERS = [
-    { id: 'sell_1', name: 'Rodrigo Rodrigues', role: 'Consultor Especialista em Imigração', phone: '5514996321001', email: 'rodrigo@rrturismo.com.br' },
-    { id: 'sell_2', name: 'Mariana Silva', role: 'Consultora de Vistos Consulares', phone: '5514996321002', email: 'vendas@rrturismo.com.br' },
-    { id: 'sell_3', name: 'Lucas Oliveira', role: 'Atendimento ao Cliente', phone: '5514996321003', email: 'atendimento@rrturismo.com.br' }
-  ];
+  // --- DADOS INICIAIS (CATÁLOGO ZERADO) ---
+  const DEFAULT_PRODUCTS = [];
+  const DEFAULT_SELLERS = [];
 
   // --- GERENCIADOR DE ESTADO DA APLICAÇÃO ---
   const AppState = {
@@ -49,12 +32,10 @@
 
     async init() {
       const savedProds = localStorage.getItem('rr_products');
-      this.products = savedProds ? JSON.parse(savedProds) : [...DEFAULT_PRODUCTS];
-      if (!savedProds) this.saveProducts();
+      this.products = savedProds ? JSON.parse(savedProds) : [];
 
       const savedSellers = localStorage.getItem('rr_sellers');
-      this.sellers = savedSellers ? JSON.parse(savedSellers) : [...DEFAULT_SELLERS];
-      if (!savedSellers) this.saveSellers();
+      this.sellers = savedSellers ? JSON.parse(savedSellers) : [];
 
       const savedQuotes = localStorage.getItem('rr_quotes');
       this.quotesHistory = savedQuotes ? JSON.parse(savedQuotes) : [];
@@ -68,19 +49,19 @@
       if (!supabaseClient) return;
       try {
         const { data: cloudProds, error: pErr } = await supabaseClient.from('rr_products').select('*');
-        if (!pErr && cloudProds && cloudProds.length > 0) {
+        if (!pErr && cloudProds) {
           this.products = cloudProds;
           localStorage.setItem('rr_products', JSON.stringify(this.products));
         }
 
         const { data: cloudSellers, error: sErr } = await supabaseClient.from('rr_sellers').select('*');
-        if (!sErr && cloudSellers && cloudSellers.length > 0) {
+        if (!sErr && cloudSellers) {
           this.sellers = cloudSellers;
           localStorage.setItem('rr_sellers', JSON.stringify(this.sellers));
         }
 
         const { data: cloudQuotes, error: qErr } = await supabaseClient.from('rr_quotes').select('*').order('created_at', { ascending: false });
-        if (!qErr && cloudQuotes && cloudQuotes.length > 0) {
+        if (!qErr && cloudQuotes) {
           this.quotesHistory = cloudQuotes.map(q => typeof q.data === 'string' ? JSON.parse(q.data) : (q.data || q));
           localStorage.setItem('rr_quotes', JSON.stringify(this.quotesHistory));
         }
@@ -385,7 +366,7 @@
         <tr>
           <td colspan="4" style="text-align: center; padding: 2rem; color: var(--slate-400);">
             <i class="fas fa-search" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
-            <p>Nenhum serviço encontrado no catálogo com esses filtros.</p>
+            <p>Nenhum serviço cadastrado no catálogo ainda.</p>
           </td>
         </tr>
       `;
@@ -428,11 +409,14 @@
     });
 
     DOM.productsTableBody.querySelectorAll('[data-del-prod]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-del-prod');
         if (confirm('Deseja realmente remover este serviço do catálogo?')) {
           AppState.products = AppState.products.filter(p => p.id !== id);
-          AppState.saveProducts();
+          await AppState.saveProducts();
+          if (supabaseClient) {
+            try { await supabaseClient.from('rr_products').delete().eq('id', id); } catch (e) {}
+          }
           populateDropdowns();
           renderProductsList();
         }
@@ -460,13 +444,18 @@
 
   function renderSellersList() {
     DOM.sellersListContainer.innerHTML = '';
+    if (AppState.sellers.length === 0) {
+      DOM.sellersListContainer.innerHTML = '<p style="color: var(--slate-400); font-size: 0.85rem; padding: 0.5rem 0;">Nenhum vendedor cadastrado ainda.</p>';
+      return;
+    }
+
     AppState.sellers.forEach(seller => {
       const div = document.createElement('div');
       div.className = 'catalog-item-card';
       div.innerHTML = `
         <div>
           <div class="catalog-item-title">${seller.name}</div>
-          <div class="catalog-item-desc">${seller.role} • ${seller.phone}</div>
+          <div class="catalog-item-desc">${seller.role || 'Consultor'} ${seller.phone ? '• ' + seller.phone : ''}</div>
         </div>
         <button class="btn-icon-del" data-del-seller="${seller.id}" title="Excluir"><i class="fas fa-trash-alt"></i></button>
       `;
@@ -474,11 +463,14 @@
     });
 
     DOM.sellersListContainer.querySelectorAll('[data-del-seller]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const id = btn.getAttribute('data-del-seller');
         if (confirm('Deseja excluir este vendedor?')) {
           AppState.sellers = AppState.sellers.filter(s => s.id !== id);
-          AppState.saveSellers();
+          await AppState.saveSellers();
+          if (supabaseClient) {
+            try { await supabaseClient.from('rr_sellers').delete().eq('id', id); } catch (e) {}
+          }
           populateDropdowns();
           renderSellersList();
         }
@@ -493,7 +485,7 @@
     }
 
     const sellerId = DOM.sellerSelect.value;
-    const seller = AppState.sellers.find(s => s.id === sellerId) || { name: 'Rodrigo Rodrigues', role: 'Consultor Especialista', phone: '5514996321001', email: 'rodrigo@rrturismo.com.br' };
+    const seller = AppState.sellers.find(s => s.id === sellerId) || { name: 'Consultor RR Turismo', role: 'Consultor de Imigração', phone: '', email: '' };
 
     const totals = calculateTotals();
     const quoteId = 'ORC-' + Math.floor(100000 + Math.random() * 900000);
@@ -582,9 +574,9 @@
             <div class="dossier-header">CONSULTOR RESPONSÁVEL</div>
             <div class="dossier-body">
               <p><strong>Vendedor:</strong> ${quote.seller.name}</p>
-              <p><strong>Cargo:</strong> ${quote.seller.role}</p>
-              <p><strong>Contato:</strong> ${quote.seller.phone}</p>
-              <p><strong>E-mail:</strong> ${quote.seller.email}</p>
+              <p><strong>Cargo:</strong> ${quote.seller.role || 'Consultor'}</p>
+              ${quote.seller.phone ? `<p><strong>Contato:</strong> ${quote.seller.phone}</p>` : ''}
+              ${quote.seller.email ? `<p><strong>E-mail:</strong> ${quote.seller.email}</p>` : ''}
             </div>
           </div>
         </div>
@@ -762,11 +754,14 @@
     });
 
     DOM.historyTableBody.querySelectorAll('[data-del-q]').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async () => {
         const qId = btn.getAttribute('data-del-q');
         if (confirm('Excluir este orçamento do histórico?')) {
           AppState.quotesHistory = AppState.quotesHistory.filter(item => item.id !== qId);
-          AppState.saveQuotes();
+          await AppState.saveQuotes();
+          if (supabaseClient) {
+            try { await supabaseClient.from('rr_quotes').delete().eq('id', qId); } catch (e) {}
+          }
           renderHistory();
         }
       });
@@ -815,7 +810,7 @@
       DOM.productCategoryFilter.addEventListener('change', renderProductsList);
     }
 
-    DOM.productForm.addEventListener('submit', (e) => {
+    DOM.productForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('newProdName').value.trim();
       const category = document.getElementById('newProdCat').value;
@@ -833,7 +828,7 @@
       };
 
       AppState.products.push(newProd);
-      AppState.saveProducts();
+      await AppState.saveProducts();
       populateDropdowns();
       renderProductsList();
 
@@ -841,7 +836,7 @@
       alert('Serviço cadastrado com sucesso!');
     });
 
-    DOM.editProductForm.addEventListener('submit', (e) => {
+    DOM.editProductForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = DOM.editProdId.value;
       const prod = AppState.products.find(p => p.id === id);
@@ -852,7 +847,7 @@
       prod.price = parseFloat(DOM.editProdPrice.value) || 0;
       prod.desc = DOM.editProdDesc.value.trim();
 
-      AppState.saveProducts();
+      await AppState.saveProducts();
       populateDropdowns();
       renderProductsList();
       closeEditProductModal();
@@ -863,7 +858,7 @@
     DOM.btnCloseEditModal.addEventListener('click', closeEditProductModal);
     DOM.btnCancelEditModal.addEventListener('click', closeEditProductModal);
 
-    DOM.sellerForm.addEventListener('submit', (e) => {
+    DOM.sellerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('newSellerName').value.trim();
       const role = document.getElementById('newSellerRole').value.trim();
@@ -881,7 +876,7 @@
       };
 
       AppState.sellers.push(newSeller);
-      AppState.saveSellers();
+      await AppState.saveSellers();
       populateDropdowns();
       renderSellersList();
 
