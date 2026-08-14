@@ -1,9 +1,23 @@
 /* ==========================================================================
-   RR TURISMO - SISTEMA DE ORÇAMENTOS (JAVASCRIPT PRINCIPAL)
+   RR TURISMO - SISTEMA DE ORÇAMENTOS (JAVASCRIPT PRINCIPAL COM SUPABASE CLOUD)
    ========================================================================== */
 
 (function () {
   'use strict';
+
+  // --- CONFIGURAÇÃO DO SUPABASE CLOUD (SINCRONIZAÇÃO EM TEMPO REAL) ---
+  // Insira a URL e a Anon Key do seu projeto Supabase abaixo:
+  const SUPABASE_URL = 'https://uyylbgyxbhppkhdjgoxq.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_WUH3JoVUU9dNLb1NH_AxRQ_I1c6E';
+
+  let supabaseClient = null;
+  if (typeof window.supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY) {
+    try {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) {
+      console.warn('Supabase não inicializado:', e);
+    }
+  }
 
   // --- DADOS INICIAIS DE FÁBRICA (SEED DATA) ---
   const DEFAULT_PRODUCTS = [
@@ -33,7 +47,7 @@
     cart: [],
     currentQuote: null,
 
-    init() {
+    async init() {
       const savedProds = localStorage.getItem('rr_products');
       this.products = savedProds ? JSON.parse(savedProds) : [...DEFAULT_PRODUCTS];
       if (!savedProds) this.saveProducts();
@@ -44,18 +58,67 @@
 
       const savedQuotes = localStorage.getItem('rr_quotes');
       this.quotesHistory = savedQuotes ? JSON.parse(savedQuotes) : [];
+
+      if (supabaseClient) {
+        await this.syncFromCloud();
+      }
     },
 
-    saveProducts() {
+    async syncFromCloud() {
+      if (!supabaseClient) return;
+      try {
+        const { data: cloudProds, error: pErr } = await supabaseClient.from('rr_products').select('*');
+        if (!pErr && cloudProds && cloudProds.length > 0) {
+          this.products = cloudProds;
+          localStorage.setItem('rr_products', JSON.stringify(this.products));
+        }
+
+        const { data: cloudSellers, error: sErr } = await supabaseClient.from('rr_sellers').select('*');
+        if (!sErr && cloudSellers && cloudSellers.length > 0) {
+          this.sellers = cloudSellers;
+          localStorage.setItem('rr_sellers', JSON.stringify(this.sellers));
+        }
+
+        const { data: cloudQuotes, error: qErr } = await supabaseClient.from('rr_quotes').select('*').order('created_at', { ascending: false });
+        if (!qErr && cloudQuotes && cloudQuotes.length > 0) {
+          this.quotesHistory = cloudQuotes.map(q => typeof q.data === 'string' ? JSON.parse(q.data) : (q.data || q));
+          localStorage.setItem('rr_quotes', JSON.stringify(this.quotesHistory));
+        }
+
+        populateDropdowns();
+        renderProductsList();
+        renderSellersList();
+        renderHistory();
+      } catch (err) {
+        console.warn('Erro ao sincronizar do Supabase Cloud:', err);
+      }
+    },
+
+    async saveProducts() {
       localStorage.setItem('rr_products', JSON.stringify(this.products));
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('rr_products').upsert(this.products);
+        } catch (e) { console.warn('Erro no upload de produto:', e); }
+      }
     },
 
-    saveSellers() {
+    async saveSellers() {
       localStorage.setItem('rr_sellers', JSON.stringify(this.sellers));
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('rr_sellers').upsert(this.sellers);
+        } catch (e) { console.warn('Erro no upload de vendedor:', e); }
+      }
     },
 
-    saveQuotes() {
+    async saveQuotes() {
       localStorage.setItem('rr_quotes', JSON.stringify(this.quotesHistory));
+      if (supabaseClient && this.currentQuote) {
+        try {
+          await supabaseClient.from('rr_quotes').upsert([{ id: this.currentQuote.id, data: this.currentQuote, created_at: this.currentQuote.date }]);
+        } catch (e) { console.warn('Erro no upload do orçamento:', e); }
+      }
     }
   };
 
@@ -357,7 +420,6 @@
       DOM.productsTableBody.appendChild(tr);
     });
 
-    // Eventos de Editar
     DOM.productsTableBody.querySelectorAll('[data-edit-prod]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-edit-prod');
@@ -365,7 +427,6 @@
       });
     });
 
-    // Eventos de Excluir
     DOM.productsTableBody.querySelectorAll('[data-del-prod]').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-del-prod');
@@ -612,7 +673,8 @@
     msg += `📄 *Orçamento:* ${q.id}\n`;
     msg += `👤 *Cliente:* ${q.client.name}\n`;
     msg += `🎯 *Destino:* ${q.client.destination}\n`;
-    msg += `👔 *Consultor:* ${q.seller.name}\n\n`;
+    msg += `👔 *Consultor:* ${q.seller.name}\n`;
+    msg += `⏳ *Validade:* ${q.validity || '7 Dias Úteis'}\n\n`;
     msg += `📋 *ITENS VENDIDOS:*\n`;
 
     q.items.forEach(item => {
@@ -638,7 +700,7 @@
 
     let text = `ORÇAMENTO RR TURISMO - ${q.id}\n`;
     text += `Cliente: ${q.client.name} | Destino: ${q.client.destination}\n`;
-    text += `Consultor: ${q.seller.name}\n\n`;
+    text += `Consultor: ${q.seller.name} | Validade: ${q.validity || '7 Dias Úteis'}\n\n`;
     text += `SERVIÇOS:\n`;
     q.items.forEach(item => {
       text += `- ${item.qty}x ${item.name}: ${formatMoney(item.qty * item.unitPrice)}\n`;
@@ -828,8 +890,8 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    AppState.init();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await AppState.init();
     setupTabs();
     populateDropdowns();
     renderCart();
