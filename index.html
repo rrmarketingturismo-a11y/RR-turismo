@@ -82,21 +82,20 @@
                 <input type="text" id="clientName" class="input-ctrl" placeholder="Ex: João da Silva">
               </div>
               <div class="form-group">
-                <label for="clientDestination">Destino do Cliente</label>
-                <input type="text" id="clientDestination" class="input-ctrl" placeholder="Ex: Portugal (Europa)">
+                <label for="clientPhone">WhatsApp do Cliente <span style="font-weight: normal; color: var(--slate-500);">(Envio Direto)</span></label>
+                <input type="tel" id="clientPhone" class="input-ctrl" placeholder="Ex: (14) 99999-9999">
               </div>
             </div>
 
-            <div class="form-group" style="margin-top: 1rem;">
-              <label for="quoteValidity">Validade da Proposta</label>
-              <select id="quoteValidity" class="select-ctrl">
-                <option value="3 Dias Úteis">3 Dias Úteis</option>
-                <option value="5 Dias Úteis">5 Dias Úteis</option>
-                <option value="7 Dias Úteis" selected>7 Dias Úteis (Padrão)</option>
-                <option value="10 Dias Úteis">10 Dias Úteis</option>
-                <option value="15 Dias Úteis">15 Dias Úteis</option>
-                <option value="30 Dias">30 Dias</option>
-              </select>
+            <div class="form-grid-2" style="margin-top: 1rem;">
+              <div class="form-group">
+                <label for="clientDestination">Destino do Cliente</label>
+                <input type="text" id="clientDestination" class="input-ctrl" placeholder="Ex: Portugal (Europa)">
+              </div>
+              <div class="form-group">
+                <label for="quoteValidity">Validade da Proposta</label>
+                <input type="text" id="quoteValidity" class="input-ctrl" value="7 Dias Úteis" placeholder="Ex: 24 horas, 2 dias, 7 dias úteis...">
+              </div>
             </div>
           </div>
 
@@ -210,6 +209,11 @@
                   <label style="font-size: 0.75rem; color: var(--slate-600);">Entrada (R$):</label>
                   <input type="number" id="downPaymentValue" class="input-ctrl" value="1000" min="0">
                 </div>
+
+                <div class="form-group" id="customInstallmentGroup" style="display: none; grid-column: span 2; margin-top: 0.4rem;">
+                  <label style="font-size: 0.75rem; color: var(--slate-700); font-weight: 600;">Valor Total Parcelado (R$) <span style="font-weight: normal; color: var(--slate-500);">(Opcional)</span>:</label>
+                  <input type="number" id="customInstallmentValue" class="input-ctrl" placeholder="Ex: Deixe vazio ou digite o valor com juros" min="0" step="10">
+                </div>
               </div>
             </div>
 
@@ -221,7 +225,7 @@
             </div>
 
             <div class="summary-row total-row">
-              <span>TOTAL:</span>
+              <span>TOTAL (À VISTA):</span>
               <span class="amount" id="totalDisplay">R$ 0,00</span>
             </div>
 
@@ -263,12 +267,10 @@
                   <label for="newProdCat">Categoria</label>
                   <select id="newProdCat" class="select-ctrl">
                     <option value="Vistos & Imigração">Vistos &amp; Imigração</option>
-                    <option value="Documentação">Documentação</option>
-                    <option value="Passagens">Passagens Aéreas</option>
-                    <option value="Recepção">Recepção / Translado</option>
-                    <option value="Seguros">Seguro Viagem</option>
-                    <option value="Hospedagem">Hospedagem &amp; Arrendamento</option>
-                    <option value="Pacotes VIP">Pacotes VIP</option>
+                    <option value="Documentos">Documentos</option>
+                    <option value="Viagem Internacional">Viagem Internacional</option>
+                    <option value="Passagens">Passagens</option>
+                    <option value="Promocional">Promocional</option>
                   </select>
                 </div>
 
@@ -279,8 +281,8 @@
               </div>
 
               <div class="form-group" style="margin-bottom: 1rem;">
-                <label for="newProdDesc">Descrição Resumida</label>
-                <input type="text" id="newProdDesc" class="input-ctrl" placeholder="Ex: Orientação técnica e preparação documental completa.">
+                <label for="newProdDesc">O que está incluso no pacote? <span style="font-weight: normal; color: var(--slate-500);">(Opcional)</span></label>
+                <input type="text" id="newProdDesc" class="input-ctrl" placeholder="Ex: Dossiê consular, agendamento e suporte presencial">
               </div>
 
               <button type="submit" class="btn-secondary" style="width: 100%;">
@@ -345,12 +347,10 @@
               <select id="productCategoryFilter" class="select-ctrl filter-select">
                 <option value="all">Todas as Categorias</option>
                 <option value="Vistos & Imigração">Vistos &amp; Imigração</option>
-                <option value="Documentação">Documentação</option>
-                <option value="Passagens">Passagens Aéreas</option>
-                <option value="Recepção">Recepção / Translado</option>
-                <option value="Seguros">Seguro Viagem</option>
-                <option value="Hospedagem">Hospedagem &amp; Arrendamento</option>
-                <option value="Pacotes VIP">Pacotes VIP</option>
+                <option value="Documentos">Documentos</option>
+                <option value="Viagem Internacional">Viagem Internacional</option>
+                <option value="Passagens">Passagens</option>
+                <option value="Promocional">Promocional</option>
               </select>
             </div>
 
@@ -438,6 +438,9 @@
         <button type="button" class="btn-whatsapp-action" id="btnWhatsappQuote">
           <i class="fab fa-whatsapp"></i> Enviar no WhatsApp
         </button>
+        <button type="button" class="btn-secondary" id="btnDownloadPdf" style="width: auto;">
+          <i class="fas fa-file-pdf"></i> Baixar PDF
+        </button>
         <button type="button" class="btn-primary" id="btnPrintQuote" style="width: auto;">
           <i class="fas fa-print"></i> Imprimir / PDF
         </button>
@@ -467,12 +470,10 @@
               <label for="editProdCat">Categoria</label>
               <select id="editProdCat" class="select-ctrl">
                 <option value="Vistos & Imigração">Vistos &amp; Imigração</option>
-                <option value="Documentação">Documentação</option>
-                <option value="Passagens">Passagens Aéreas</option>
-                <option value="Recepção">Recepção / Translado</option>
-                <option value="Seguros">Seguro Viagem</option>
-                <option value="Hospedagem">Hospedagem &amp; Arrendamento</option>
-                <option value="Pacotes VIP">Pacotes VIP</option>
+                <option value="Documentos">Documentos</option>
+                <option value="Viagem Internacional">Viagem Internacional</option>
+                <option value="Passagens">Passagens</option>
+                <option value="Promocional">Promocional</option>
               </select>
             </div>
 
@@ -483,8 +484,8 @@
           </div>
 
           <div class="form-group">
-            <label for="editProdDesc">Descrição Resumida</label>
-            <textarea id="editProdDesc" class="textarea-ctrl" rows="3" placeholder="Detalhamento das etapas..."></textarea>
+            <label for="editProdDesc">O que está incluso no pacote? <span style="font-weight: normal; color: var(--slate-500);">(Opcional)</span></label>
+            <textarea id="editProdDesc" class="textarea-ctrl" rows="3" placeholder="Ex: Dossiê consular, agendamento e suporte presencial"></textarea>
           </div>
         </div>
 
@@ -503,6 +504,8 @@
 
   <!-- Supabase Cloud DB SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Geração Direta de PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <!-- Script JS -->
   <script src="js/orcamento.js"></script>
 </body>

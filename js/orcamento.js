@@ -143,6 +143,7 @@
 
     sellerSelect: document.getElementById('sellerSelect'),
     clientName: document.getElementById('clientName'),
+    clientPhone: document.getElementById('clientPhone'),
     clientDestination: document.getElementById('clientDestination'),
     quoteValidity: document.getElementById('quoteValidity'),
     quoteNotes: document.getElementById('quoteNotes'),
@@ -151,6 +152,9 @@
     discountType: document.getElementById('discountType'),
     discountValue: document.getElementById('discountValue'),
     downPaymentValue: document.getElementById('downPaymentValue'),
+    downPaymentGroup: document.getElementById('downPaymentGroup'),
+    customInstallmentValue: document.getElementById('customInstallmentValue'),
+    customInstallmentGroup: document.getElementById('customInstallmentGroup'),
 
     productSelect: document.getElementById('productSelect'),
     quickAddBtn: document.getElementById('quickAddBtn'),
@@ -178,6 +182,7 @@
     quoteModal: document.getElementById('quoteModal'),
     btnCloseModal: document.getElementById('btnCloseModal'),
     quotePaperContent: document.getElementById('quotePaperContent'),
+    btnDownloadPdf: document.getElementById('btnDownloadPdf'),
     btnPrintQuote: document.getElementById('btnPrintQuote'),
     btnWhatsappQuote: document.getElementById('btnWhatsappQuote'),
     btnCopyQuoteText: document.getElementById('btnCopyQuoteText'),
@@ -362,23 +367,28 @@
     const pMethod = DOM.paymentMethod.value;
     const instCount = parseInt(DOM.installmentsCount.value) || 1;
     const downVal = parseFloat(DOM.downPaymentValue.value) || 0;
+    const customInstVal = parseFloat(DOM.customInstallmentValue.value) || 0;
+
+    const installmentTotal = customInstVal > 0 ? customInstVal : total;
 
     let summaryText = '';
 
     if (pMethod === 'avista') {
       summaryText = `<strong>À Vista (PIX / Transferência):</strong> ${formatMoney(total)}`;
     } else if (pMethod === 'parcelado') {
-      const valorParcela = total / instCount;
-      summaryText = `<strong>${instCount}x de ${formatMoney(valorParcela)}</strong> sem juros no cartão de crédito.`;
+      const valorParcela = installmentTotal / instCount;
+      const extraMsg = customInstVal > 0 ? ` (Total parcelado: ${formatMoney(installmentTotal)})` : '';
+      summaryText = `<strong>${instCount}x de ${formatMoney(valorParcela)}</strong> no cartão de crédito${extraMsg}.`;
     } else if (pMethod === 'sinal') {
-      const saldoRestante = Math.max(0, total - downVal);
+      const saldoRestante = Math.max(0, installmentTotal - downVal);
       const valorParcela = instCount > 1 ? saldoRestante / instCount : saldoRestante;
-      summaryText = `<strong>Entrada:</strong> ${formatMoney(downVal)} + <strong>${instCount}x de ${formatMoney(valorParcela)}</strong> do saldo.`;
+      const extraMsg = customInstVal > 0 ? ` (Total parcelado: ${formatMoney(installmentTotal)})` : '';
+      summaryText = `<strong>Entrada:</strong> ${formatMoney(downVal)} + <strong>${instCount}x de ${formatMoney(valorParcela)}</strong> do saldo parcelado${extraMsg}.`;
     }
 
     DOM.paymentSummaryDetails.innerHTML = summaryText;
 
-    return { subtotal, discount, discountPercentStr, discType, total, pMethod, instCount, downVal, summaryText };
+    return { subtotal, discount, discountPercentStr, discType, total, installmentTotal, pMethod, instCount, downVal, summaryText };
   }
 
   // --- RENDERIZAR TABELA DE PRODUTOS COM BUSCA & EDIÇÃO ---
@@ -412,7 +422,7 @@
       tr.innerHTML = `
         <td>
           <span class="catalog-prod-title">${prod.name}</span>
-          ${prod.desc ? `<div class="catalog-prod-desc">${prod.desc}</div>` : ''}
+          ${prod.desc ? `<div class="catalog-prod-desc"><strong>Incluso:</strong> ${prod.desc}</div>` : ''}
         </td>
         <td>
           <span class="badge-cat">${prod.category}</span>
@@ -530,9 +540,10 @@
       seller: seller,
       client: {
         name: DOM.clientName.value.trim() || 'Cliente Não Informado',
+        phone: DOM.clientPhone ? DOM.clientPhone.value.trim() : '',
         destination: DOM.clientDestination.value.trim() || 'Portugal / Europa'
       },
-      validity: DOM.quoteValidity ? DOM.quoteValidity.value : '7 Dias Úteis',
+      validity: DOM.quoteValidity ? (DOM.quoteValidity.value.trim() || '7 Dias Úteis') : '7 Dias Úteis',
       items: [...AppState.cart],
       notes: DOM.quoteNotes.value.trim(),
       financials: totals,
@@ -558,7 +569,7 @@
       <tr class="quote-item-row">
         <td>
           <div class="item-title-print">${item.name}</div>
-          <div class="item-cat-print">${item.category}</div>
+          <div class="item-cat-print">${item.category} ${item.desc ? '| Incluso: ' + item.desc : ''}</div>
         </td>
         <td style="text-align:center; font-weight:600;">${item.qty}</td>
         <td style="text-align:right;">${formatMoney(item.unitPrice)}</td>
@@ -654,7 +665,7 @@
               </tr>
               ` : ''}
               <tr class="total-row-print">
-                <td class="lbl">TOTAL LÍQUIDO:</td>
+                <td class="lbl">TOTAL LÍQUIDO (À VISTA):</td>
                 <td class="val total-val">${formatMoney(quote.financials.total)}</td>
               </tr>
             </table>
@@ -679,14 +690,50 @@
     `;
   }
 
+  // --- GERAR NOME PERSONALIZADO DO ARQUIVO PDF ---
+  // Exemplo: ORCAMENTO RR TURISMO - ORCAMENTO 30390 - CLIENTE JOAO DA SILVA
+  function buildPdfFilename(quote) {
+    const code = quote.id ? quote.id.replace('ORC-', '') : Math.floor(10000 + Math.random() * 90000);
+    const clientName = quote.client && quote.client.name 
+      ? quote.client.name.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9 ]/g, '').toUpperCase()
+      : 'CLIENTE';
+    return `ORCAMENTO RR TURISMO - ORCAMENTO ${code} - CLIENTE ${clientName}`;
+  }
+
+  // --- DOWNLOAD DIRETO DO PDF NO NAVEGADOR ---
+  function downloadPdfDirectly() {
+    if (!AppState.currentQuote) return;
+    const q = AppState.currentQuote;
+    const filename = buildPdfFilename(q) + '.pdf';
+
+    const element = DOM.quotePaperContent.querySelector('.quote-paper') || DOM.quotePaperContent;
+
+    if (typeof window.html2pdf !== 'undefined') {
+      const opt = {
+        margin:       [6, 6, 6, 6],
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      window.html2pdf().set(opt).from(element).save();
+    } else {
+      triggerIsolatedPrint();
+    }
+  }
+
   function triggerIsolatedPrint() {
     if (!AppState.currentQuote) return;
+    const q = AppState.currentQuote;
+    const originalTitle = document.title;
+    document.title = buildPdfFilename(q);
     
     DOM.printArea.innerHTML = DOM.quotePaperContent.innerHTML;
     window.print();
     
     setTimeout(() => {
       DOM.printArea.innerHTML = '';
+      document.title = originalTitle;
     }, 1000);
   }
 
@@ -694,8 +741,11 @@
     if (!AppState.currentQuote) return;
     const q = AppState.currentQuote;
 
+    const currentOrigin = window.location.origin + window.location.pathname;
+    const pdfOnlineLink = `${currentOrigin}?orcamento=${q.id}`;
+
     let msg = `✈️ *ORÇAMENTO - RR TURISMO*\n`;
-    msg += `📄 *Orçamento:* ${q.id}\n`;
+    msg += `📄 *Código:* ${q.id}\n`;
     msg += `👤 *Cliente:* ${q.client.name}\n`;
     msg += `🎯 *Destino:* ${q.client.destination}\n`;
     msg += `👔 *Consultor:* ${q.seller.name}\n`;
@@ -712,16 +762,35 @@
     }
     msg += `✅ *VALOR TOTAL:* ${formatMoney(q.financials.total)}\n`;
     msg += `💳 *CONDIÇÃO:* ${q.financials.summaryText.replace(/<\/?[^>]+(>|$)/g, "")}\n\n`;
+    msg += `📄 *Proposta em PDF:* \n${pdfOnlineLink}\n\n`;
     msg += `Ficamos à disposição!`;
 
     const encoded = encodeURIComponent(msg);
-    const waUrl = `https://wa.me/?text=${encoded}`;
+    let rawPhone = q.client && q.client.phone ? q.client.phone.replace(/\D/g, '') : '';
+    if (rawPhone && !rawPhone.startsWith('55') && rawPhone.length >= 10) {
+      rawPhone = '55' + rawPhone;
+    }
+
+    let waUrl = '';
+    if (rawPhone && rawPhone.length >= 12) {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        waUrl = `https://wa.me/${rawPhone}?text=${encoded}`;
+      } else {
+        waUrl = `https://web.whatsapp.com/send?phone=${rawPhone}&text=${encoded}`;
+      }
+    } else {
+      waUrl = `https://wa.me/?text=${encoded}`;
+    }
+
     window.open(waUrl, '_blank');
   }
 
   function copyQuoteText() {
     if (!AppState.currentQuote) return;
     const q = AppState.currentQuote;
+    const currentOrigin = window.location.origin + window.location.pathname;
+    const pdfOnlineLink = `${currentOrigin}?orcamento=${q.id}`;
 
     let text = `ORÇAMENTO RR TURISMO - ${q.id}\n`;
     text += `Cliente: ${q.client.name} | Destino: ${q.client.destination}\n`;
@@ -735,11 +804,37 @@
       text += `DESCONTO: -${formatMoney(q.financials.discount)} (${q.financials.discountPercentStr})\n`;
     }
     text += `TOTAL: ${formatMoney(q.financials.total)}\n`;
-    text += `CONDIÇÃO DE PAGAMENTO: ${q.financials.summaryText.replace(/<\/?[^>]+(>|$)/g, "")}\n`;
+    text += `CONDIÇÃO DE PAGAMENTO: ${q.financials.summaryText.replace(/<\/?[^>]+(>|$)/g, "")}\n\n`;
+    text += `PDF OFICIAL: ${pdfOnlineLink}\n`;
 
     navigator.clipboard.writeText(text).then(() => {
-      alert('Resumo do orçamento copiado!');
+      alert('Resumo do orçamento com link do PDF copiado!');
     });
+  }
+
+  async function checkUrlQuoteParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const quoteId = urlParams.get('orcamento') || urlParams.get('q');
+    if (!quoteId) return;
+
+    let targetQuote = AppState.quotesHistory.find(item => item.id === quoteId);
+
+    if (!targetQuote && supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient.from('rr_quotes').select('*').eq('id', quoteId).single();
+        if (!error && data) {
+          targetQuote = typeof data.data === 'string' ? JSON.parse(data.data) : (data.data || data);
+        }
+      } catch (e) {
+        console.warn('Erro buscando orçamento por ID no Supabase:', e);
+      }
+    }
+
+    if (targetQuote) {
+      AppState.currentQuote = targetQuote;
+      renderQuotePaper(targetQuote);
+      DOM.quoteModal.classList.add('active');
+    }
   }
 
   function renderHistory() {
@@ -815,15 +910,22 @@
       DOM.discountType.addEventListener(evt, calculateTotals);
       DOM.discountValue.addEventListener(evt, calculateTotals);
       DOM.paymentMethod.addEventListener(evt, () => {
-        if (DOM.paymentMethod.value === 'sinal') {
-          document.getElementById('downPaymentGroup').style.display = 'flex';
+        const pVal = DOM.paymentMethod.value;
+        if (pVal === 'sinal') {
+          DOM.downPaymentGroup.style.display = 'flex';
+          DOM.customInstallmentGroup.style.display = 'flex';
+        } else if (pVal === 'parcelado') {
+          DOM.downPaymentGroup.style.display = 'none';
+          DOM.customInstallmentGroup.style.display = 'flex';
         } else {
-          document.getElementById('downPaymentGroup').style.display = 'none';
+          DOM.downPaymentGroup.style.display = 'none';
+          DOM.customInstallmentGroup.style.display = 'none';
         }
         calculateTotals();
       });
       DOM.installmentsCount.addEventListener(evt, calculateTotals);
       DOM.downPaymentValue.addEventListener(evt, calculateTotals);
+      DOM.customInstallmentValue.addEventListener(evt, calculateTotals);
     });
 
     DOM.btnGenerateQuote.addEventListener('click', generateQuote);
@@ -832,6 +934,9 @@
       DOM.quoteModal.classList.remove('active');
     });
 
+    if (DOM.btnDownloadPdf) {
+      DOM.btnDownloadPdf.addEventListener('click', downloadPdfDirectly);
+    }
     DOM.btnPrintQuote.addEventListener('click', triggerIsolatedPrint);
     DOM.btnWhatsappQuote.addEventListener('click', sendToWhatsapp);
     DOM.btnCopyQuoteText.addEventListener('click', copyQuoteText);
@@ -927,6 +1032,7 @@
     renderSellersList();
     renderHistory();
     setupEventListeners();
+    await checkUrlQuoteParam();
   });
 
 })();
