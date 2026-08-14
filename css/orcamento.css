@@ -1,0 +1,1103 @@
+/* ==========================================================================
+   RR TURISMO - SISTEMA DE ORÇAMENTOS (DESIGN CLEAN & MINIMALISTA)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+:root {
+  --bg-canvas: #F8FAFC;
+  --bg-card: #FFFFFF;
+  
+  --navy-deep: #0F172A;
+  --navy-subtle: #1E293B;
+  
+  --gold-primary: #B8860B;
+  --gold-light: #DFB15B;
+  
+  --slate-900: #0F172A;
+  --slate-800: #1E293B;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748B;
+  --slate-400: #94A3B8;
+  --slate-300: #CBD5E1;
+  --slate-200: #E2E8F0;
+  --slate-100: #F1F5F9;
+  --slate-50: #F8FAFC;
+  
+  --emerald-600: #16A34A;
+  --emerald-50: #F0FDF4;
+  --red-600: #DC2626;
+  --red-50: #FEF2F2;
+
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --shadow-subtle: 0 1px 3px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --shadow-card: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 2px 4px -2px rgba(15, 23, 42, 0.02);
+  --shadow-modal: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-canvas);
+  color: var(--slate-800);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Cabeçalho Limpo --- */
+.app-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--slate-200);
+  padding: 0.9rem 0;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+}
+
+.header-logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--slate-900);
+  letter-spacing: -0.2px;
+}
+
+.brand-tag {
+  font-size: 0.72rem;
+  color: var(--slate-500);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.sys-badge {
+  background: var(--slate-100);
+  color: var(--slate-700);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--slate-200);
+}
+
+/* --- Main Layout --- */
+.main-wrapper {
+  max-width: 1200px;
+  width: 100%;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  flex: 1;
+}
+
+/* --- Navegação por Abas Minimalistas --- */
+.nav-tabs-container {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--slate-200);
+  margin-bottom: 2rem;
+  padding-bottom: 0;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--slate-600);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: -1px;
+}
+
+.tab-btn i {
+  font-size: 0.95rem;
+  color: var(--slate-400);
+  transition: var(--transition);
+}
+
+.tab-btn:hover {
+  color: var(--slate-900);
+}
+
+.tab-btn:hover i {
+  color: var(--slate-700);
+}
+
+.tab-btn.active {
+  color: var(--slate-900);
+  border-bottom-color: var(--slate-900);
+  font-weight: 700;
+}
+
+.tab-btn.active i {
+  color: var(--gold-primary);
+}
+
+.badge-count {
+  background: var(--slate-200);
+  color: var(--slate-700);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 10px;
+}
+
+.tab-btn.active .badge-count {
+  background: var(--slate-900);
+  color: #FFFFFF;
+}
+
+/* --- Conteúdo das Abas --- */
+.tab-content {
+  display: none;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Layout Grid (Gerador de Orçamento) --- */
+.builder-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .builder-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Painéis / Cards --- */
+.card-panel {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--slate-200);
+  box-shadow: var(--shadow-subtle);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.card-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--slate-900);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.card-title i {
+  color: var(--slate-500);
+  font-size: 1rem;
+}
+
+/* --- Formulários & Inputs --- */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .form-grid-2, .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--slate-700);
+}
+
+.form-group label span.required {
+  color: var(--red-600);
+}
+
+.input-ctrl, .select-ctrl, .textarea-ctrl {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--slate-900);
+  background: #FFFFFF;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: var(--transition);
+}
+
+.input-ctrl:focus, .select-ctrl:focus, .textarea-ctrl:focus {
+  border-color: var(--slate-900);
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.08);
+}
+
+.quick-add-box {
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.25rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+@media (max-width: 640px) {
+  .quick-add-box {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* --- Tabela de Itens do Orçamento --- */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.25rem;
+}
+
+.items-table th {
+  background: var(--slate-50);
+  color: var(--slate-600);
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.items-table td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--slate-200);
+  vertical-align: middle;
+  font-size: 0.88rem;
+}
+
+.items-table tr:last-child td {
+  border-bottom: none;
+}
+
+.item-name {
+  font-weight: 600;
+  color: var(--slate-900);
+  display: block;
+}
+
+.item-cat {
+  font-size: 0.75rem;
+  color: var(--slate-500);
+}
+
+.qty-input {
+  width: 65px;
+  padding: 0.4rem 0.5rem;
+  text-align: center;
+}
+
+.price-input {
+  width: 110px;
+  padding: 0.4rem 0.5rem;
+}
+
+.btn-icon-del {
+  background: transparent;
+  color: var(--slate-400);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon-del:hover {
+  background: var(--red-50);
+  color: var(--red-600);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--slate-400);
+}
+
+.empty-state i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--slate-300);
+}
+
+/* --- Resumo Financeiro --- */
+.summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+  position: sticky;
+  top: 20px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.88rem;
+  color: var(--slate-600);
+}
+
+.summary-row.total-row {
+  border-top: 2px solid var(--slate-900);
+  margin-top: 0.75rem;
+  padding-top: 1rem;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--slate-900);
+}
+
+.summary-row.total-row span.amount {
+  font-size: 1.25rem;
+  color: var(--slate-900);
+}
+
+.payment-calc-box {
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  padding: 0.85rem;
+  border-radius: var(--radius-sm);
+  margin: 1rem 0;
+}
+
+.payment-calc-box label {
+  font-size: 0.75rem;
+  color: var(--slate-600);
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+/* --- Botões Clean --- */
+.btn-primary {
+  background: var(--slate-900);
+  color: #FFFFFF;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.btn-primary:hover {
+  background: #1E293B;
+}
+
+.btn-secondary {
+  background: var(--slate-100);
+  color: var(--slate-800);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.65rem 1.1rem;
+  border: 1px solid var(--slate-300);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-secondary:hover {
+  background: var(--slate-200);
+  color: var(--slate-900);
+}
+
+.btn-whatsapp-action {
+  background: var(--emerald-600);
+  color: #FFFFFF;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 0.75rem 1.2rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.btn-whatsapp-action:hover {
+  background: #15803D;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--slate-300);
+  color: var(--slate-700);
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-outline:hover {
+  background: var(--slate-100);
+  border-color: var(--slate-400);
+  color: var(--slate-900);
+}
+
+.btn-sm {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+/* ==========================================================================
+   LAYOUT DA ABA DE CADASTROS ORGANIZADA & FILTROS DE CATÁLOGO
+   ========================================================================== */
+.cadastros-layout-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .cadastros-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.catalog-filter-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--slate-400);
+  font-size: 0.85rem;
+}
+
+.filter-input {
+  padding-left: 2.2rem;
+}
+
+.filter-select {
+  width: 200px;
+}
+
+@media (max-width: 640px) {
+  .filter-select {
+    width: 100%;
+  }
+}
+
+/* Tabela do Catálogo */
+.catalog-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.catalog-table th {
+  background: var(--slate-50);
+  color: var(--slate-600);
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid var(--slate-200);
+}
+
+.catalog-table td {
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--slate-200);
+  vertical-align: middle;
+}
+
+.catalog-row:hover {
+  background: var(--slate-50);
+}
+
+.catalog-prod-title {
+  font-weight: 700;
+  color: var(--slate-900);
+  display: block;
+}
+
+.catalog-prod-desc {
+  font-size: 0.75rem;
+  color: var(--slate-500);
+  margin-top: 0.15rem;
+}
+
+.badge-cat {
+  display: inline-block;
+  background: var(--slate-100);
+  color: var(--slate-700);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--slate-200);
+  white-space: nowrap;
+}
+
+.sellers-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+/* --- Modais & Espelho Timbrado --- */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-box {
+  background: #FFFFFF;
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 860px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+}
+
+.modal-header {
+  background: var(--slate-900);
+  color: #FFFFFF;
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  color: var(--slate-400);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-close-modal:hover {
+  color: #FFFFFF;
+}
+
+.modal-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+  background: var(--slate-100);
+}
+
+.modal-footer {
+  background: #FFFFFF;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--slate-200);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   DOCUMENTO EXECUTIVO DE ORÇAMENTO (1 PÁGINA A4 COMPACTA & PROFISSIONAL)
+   ========================================================================== */
+.quote-paper {
+  background: #FFFFFF;
+  padding: 2.25rem;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  color: var(--slate-900);
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  font-family: var(--font-body);
+  position: relative;
+  max-width: 100%;
+}
+
+.quote-header-print {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--slate-900);
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.quote-logo-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.quote-logo-img {
+  height: 55px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text-print h2 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.brand-text-print .subtext {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gold-primary);
+  margin-top: 0.05rem;
+}
+
+.brand-text-print .reg-text {
+  font-size: 0.7rem;
+  color: var(--slate-500);
+  margin-top: 0.1rem;
+}
+
+.quote-meta-badge {
+  text-align: right;
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+}
+
+.quote-code {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  letter-spacing: 0.5px;
+}
+
+.quote-date-info {
+  font-size: 0.72rem;
+  color: var(--slate-600);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-top: 0.2rem;
+}
+
+.quote-dossier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.dossier-card {
+  border: 1px solid var(--slate-200);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--slate-50);
+}
+
+.dossier-header {
+  background: var(--slate-900);
+  color: #FFFFFF;
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 0.35rem 0.75rem;
+}
+
+.dossier-body {
+  padding: 0.65rem 0.85rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.dossier-body p {
+  margin-bottom: 0.15rem;
+  color: var(--slate-700);
+}
+
+.dossier-body p:last-child {
+  margin-bottom: 0;
+}
+
+.dossier-body strong {
+  color: var(--slate-900);
+}
+
+.destination-highlight {
+  color: var(--gold-primary);
+  font-weight: 700;
+}
+
+.section-title-print {
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 0.5rem;
+}
+
+.quote-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+}
+
+.quote-items-table th {
+  background: var(--slate-900);
+  color: #FFFFFF;
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 0.65rem;
+}
+
+.quote-items-table td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid var(--slate-200);
+  vertical-align: middle;
+}
+
+.quote-item-row:nth-child(even) {
+  background: #FAFBFD;
+}
+
+.item-title-print {
+  font-weight: 700;
+  color: var(--slate-900);
+  font-size: 0.85rem;
+}
+
+.item-cat-print {
+  font-size: 0.7rem;
+  color: var(--slate-500);
+  font-weight: 600;
+}
+
+.quote-footer-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+.payment-terms-compact {
+  border: 1px solid var(--slate-200);
+  border-left: 3px solid var(--slate-900);
+  border-radius: 6px;
+  background: var(--slate-50);
+  padding: 0.65rem 0.85rem;
+}
+
+.terms-title {
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--slate-900);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.3rem;
+}
+
+.payment-highlight {
+  font-size: 0.82rem;
+  color: var(--slate-900);
+}
+
+.notes-compact {
+  font-size: 0.75rem;
+  color: var(--slate-600);
+  margin-top: 0.3rem;
+}
+
+.financial-box-print {
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+}
+
+.summary-table-print {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.summary-table-print tr td {
+  padding: 0.25rem 0;
+}
+
+.summary-table-print .lbl {
+  color: var(--slate-600);
+}
+
+.summary-table-print .val {
+  text-align: right;
+  font-weight: 600;
+  color: var(--slate-900);
+}
+
+.summary-table-print tr.discount-row td {
+  color: var(--emerald-600);
+  font-weight: 600;
+}
+
+.discount-pct-badge {
+  background: var(--emerald-50);
+  color: var(--emerald-600);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+}
+
+.summary-table-print tr.total-row-print td {
+  border-top: 2px solid var(--slate-900);
+  padding-top: 0.4rem;
+  margin-top: 0.25rem;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.summary-table-print tr.total-row-print .total-val {
+  color: var(--slate-900);
+}
+
+.signatures-print-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.signature-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.signature-line-mark {
+  width: 100%;
+  border-top: 1px solid var(--slate-400);
+  margin-bottom: 0.3rem;
+}
+
+.signature-box strong {
+  font-size: 0.8rem;
+  color: var(--slate-900);
+}
+
+.signature-box p {
+  font-size: 0.72rem;
+  color: var(--slate-500);
+}
+
+/* ==========================================================================
+   REGRAS DE IMPRESSÃO ISOLADA (EXCLUSIVAMENTE A FOLHA DO ORÇAMENTO)
+   ========================================================================== */
+.print-area-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0.8cm;
+  }
+
+  html, body {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    overflow: hidden !important;
+  }
+
+  /* Esconde toda a interface web da página */
+  body > *:not(#printArea) {
+    display: none !important;
+  }
+
+  /* Exibe EXCLUSIVAMENTE a área da folha do orçamento */
+  #printArea {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    overflow: visible !important;
+  }
+
+  .quote-paper {
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    max-height: 270mm !important;
+    page-break-inside: avoid !important;
+  }
+
+  .quote-item-row,
+  .quote-footer-grid,
+  .signatures-print-grid {
+    page-break-inside: avoid !important;
+  }
+}

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RR Turismo | Sistema de Orçamentos</title>
+  <meta name="description" content="Sistema de Geração de Orçamentos para Pacotes de Imigração e Viagens - RR Turismo.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/logo.png">
+
+  <!-- Fontes & Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Estilo do Sistema -->
+  <link rel="stylesheet" href="css/orcamento.css">
+</head>
+<body>
+
+  <!-- CABEÇALHO CLEAN COM LOGO OFICIAL -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <img src="assets/logo.png" alt="RR Turismo Logo" class="header-logo-img">
+        <div class="brand-info">
+          <span class="brand-name">RR TURISMO</span>
+          <span class="brand-tag">Assessoria de Imigração &amp; Viagens</span>
+        </div>
+      </div>
+
+      <div class="sys-badge">
+        <i class="fas fa-calculator"></i>
+        <span>Gerador de Orçamentos</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-wrapper">
+
+    <!-- NAVEGAÇÃO DE ABAS CLEAN -->
+    <nav class="nav-tabs-container">
+      <button class="tab-btn active" data-tab="tab-builder">
+        <i class="fas fa-calculator"></i>
+        <span>Gerar Orçamento</span>
+        <span class="badge-count" id="cartCountBadge">0</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-cadastros">
+        <i class="fas fa-boxes-stacked"></i>
+        <span>Cadastros &amp; Catálogo</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-historico">
+        <i class="fas fa-clock-rotate-left"></i>
+        <span>Histórico</span>
+        <span class="badge-count" id="historyCountBadge">0</span>
+      </button>
+    </nav>
+
+    <!-- ABA 1: GERAR ORÇAMENTO -->
+    <section class="tab-content active" id="tab-builder">
+      <div class="builder-grid">
+        
+        <!-- PAINEL ESQUERDO -->
+        <div class="builder-left">
+          
+          <!-- Card: Vendedor e Cliente -->
+          <div class="card-panel">
+            <h3 class="card-title">
+              <i class="fas fa-user-circle"></i> Vendedor &amp; Cliente
+            </h3>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="sellerSelect">Vendedor Responsável <span class="required">*</span></label>
+              <select id="sellerSelect" class="select-ctrl">
+                <!-- Preenchido via JS -->
+              </select>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="clientName">Nome do Cliente <span class="required">*</span></label>
+                <input type="text" id="clientName" class="input-ctrl" placeholder="Ex: João da Silva">
+              </div>
+              <div class="form-group">
+                <label for="clientDestination">Destino do Cliente</label>
+                <input type="text" id="clientDestination" class="input-ctrl" placeholder="Ex: Portugal (Europa)">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 1rem;">
+              <label for="quoteValidity">Validade da Proposta</label>
+              <select id="quoteValidity" class="select-ctrl">
+                <option value="3 Dias Úteis">3 Dias Úteis</option>
+                <option value="5 Dias Úteis">5 Dias Úteis</option>
+                <option value="7 Dias Úteis" selected>7 Dias Úteis (Padrão)</option>
+                <option value="10 Dias Úteis">10 Dias Úteis</option>
+                <option value="15 Dias Úteis">15 Dias Úteis</option>
+                <option value="30 Dias">30 Dias</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Card: Seleção de Serviços e Tabela -->
+          <div class="card-panel">
+            <h3 class="card-title">
+              <i class="fas fa-list-check"></i> Serviços Selecionados
+            </h3>
+
+            <div class="quick-add-box">
+              <div class="form-group" style="flex: 1;">
+                <label for="productSelect">Selecione o Serviço no Catálogo:</label>
+                <select id="productSelect" class="select-ctrl">
+                  <!-- Preenchido via JS -->
+                </select>
+              </div>
+              <button type="button" id="quickAddBtn" class="btn-secondary">
+                <i class="fas fa-plus"></i> Adicionar
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="items-table">
+                <thead>
+                  <tr>
+                    <th>Item / Serviço</th>
+                    <th style="width: 75px; text-align: center;">Qtd</th>
+                    <th style="width: 120px;">Valor Unit. (R$)</th>
+                    <th style="width: 110px;">Subtotal</th>
+                    <th style="width: 40px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="cartTableBody">
+                  <!-- Preenchido via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="empty-state" id="emptyCartState">
+              <i class="fas fa-folder-open"></i>
+              <p>Nenhum serviço adicionado a este orçamento ainda.</p>
+            </div>
+          </div>
+
+          <!-- Card: Observações -->
+          <div class="card-panel">
+            <h3 class="card-title">
+              <i class="fas fa-pen-to-square"></i> Observações da Proposta
+            </h3>
+            <div class="form-group">
+              <textarea id="quoteNotes" class="textarea-ctrl" rows="3" placeholder="Ex: Inclui assessoria de agendamento presencial no consulado. Sujeito a aprovação de documentação."></textarea>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- PAINEL DIREITO: RESUMO FINANCEIRO -->
+        <div class="builder-right">
+          <div class="summary-card">
+            <h3 class="card-title">
+              <i class="fas fa-receipt"></i> Resumo Comercial
+            </h3>
+
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <strong id="subtotalDisplay">R$ 0,00</strong>
+            </div>
+
+            <!-- Desconto -->
+            <div style="margin: 0.85rem 0; background: var(--slate-50); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--slate-200);">
+              <label style="font-size: 0.78rem; color: var(--slate-700); display: block; margin-bottom: 0.3rem; font-weight:600;">Desconto Especial:</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <select id="discountType" class="select-ctrl" style="width: 85px; padding: 0.4rem;">
+                  <option value="money">R$</option>
+                  <option value="percent">%</option>
+                </select>
+                <input type="number" id="discountValue" class="input-ctrl" value="0" min="0" placeholder="0" style="padding: 0.4rem;">
+              </div>
+            </div>
+
+            <div class="summary-row" style="color: var(--emerald-600);">
+              <span>Desconto:</span>
+              <strong id="discountDisplay">R$ 0,00</strong>
+            </div>
+
+            <!-- Condições de Pagamento -->
+            <div style="margin: 0.85rem 0;">
+              <label style="font-size: 0.78rem; color: var(--slate-700); display: block; margin-bottom: 0.3rem; font-weight:600;">Forma de Pagamento:</label>
+              <select id="paymentMethod" class="select-ctrl" style="margin-bottom: 0.5rem;">
+                <option value="avista">À Vista (PIX / Transferência)</option>
+                <option value="parcelado">Parcelado no Cartão de Crédito</option>
+                <option value="sinal">Entrada / Sinal + Saldo Parcelado</option>
+              </select>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label style="font-size: 0.75rem; color: var(--slate-600);">Parcelas:</label>
+                  <select id="installmentsCount" class="select-ctrl">
+                    <option value="1">1x</option>
+                    <option value="2">2x</option>
+                    <option value="3">3x</option>
+                    <option value="4">4x</option>
+                    <option value="5">5x</option>
+                    <option value="6">6x</option>
+                    <option value="10">10x</option>
+                    <option value="12" selected>12x</option>
+                  </select>
+                </div>
+
+                <div class="form-group" id="downPaymentGroup" style="display: none;">
+                  <label style="font-size: 0.75rem; color: var(--slate-600);">Entrada (R$):</label>
+                  <input type="number" id="downPaymentValue" class="input-ctrl" value="1000" min="0">
+                </div>
+              </div>
+            </div>
+
+            <div class="payment-calc-box">
+              <label><i class="fas fa-calculator"></i> Condição Calculada:</label>
+              <div id="paymentSummaryDetails" style="font-size: 0.85rem; color: var(--slate-900);">
+                --
+              </div>
+            </div>
+
+            <div class="summary-row total-row">
+              <span>TOTAL:</span>
+              <span class="amount" id="totalDisplay">R$ 0,00</span>
+            </div>
+
+            <div style="margin-top: 1.25rem;">
+              <button type="button" id="btnGenerateQuote" class="btn-primary">
+                <i class="fas fa-file-invoice"></i> GERAR ORÇAMENTO
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 2: CADASTROS & CATÁLOGO ORGANIZADO -->
+    <section class="tab-content" id="tab-cadastros">
+      
+      <!-- GRID DE CADASTRO E GERENCIAMENTO -->
+      <div class="cadastros-layout-grid">
+        
+        <!-- COLUNA ESQUERDA: FORMULÁRIOS DE CADASTRO -->
+        <div class="cadastros-left-col">
+          
+          <!-- CARD: NOVO SERVIÇO -->
+          <div class="card-panel">
+            <h3 class="card-title">
+              <i class="fas fa-plus-circle"></i> Cadastrar Novo Serviço / Pacote
+            </h3>
+
+            <form id="productForm">
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="newProdName">Nome do Serviço <span class="required">*</span></label>
+                <input type="text" id="newProdName" class="input-ctrl" placeholder="Ex: Visto D7 - Rendimentos Próprios" required>
+              </div>
+
+              <div class="form-grid-2" style="margin-bottom: 0.75rem;">
+                <div class="form-group">
+                  <label for="newProdCat">Categoria</label>
+                  <select id="newProdCat" class="select-ctrl">
+                    <option value="Vistos & Imigração">Vistos &amp; Imigração</option>
+                    <option value="Documentação">Documentação</option>
+                    <option value="Passagens">Passagens Aéreas</option>
+                    <option value="Recepção">Recepção / Translado</option>
+                    <option value="Seguros">Seguro Viagem</option>
+                    <option value="Hospedagem">Hospedagem &amp; Arrendamento</option>
+                    <option value="Pacotes VIP">Pacotes VIP</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="newProdPrice">Valor Padrão (R$) <span class="required">*</span></label>
+                  <input type="number" id="newProdPrice" class="input-ctrl" placeholder="Ex: 3500" step="10" min="0" required>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="newProdDesc">Descrição Resumida</label>
+                <input type="text" id="newProdDesc" class="input-ctrl" placeholder="Ex: Orientação técnica e preparação documental completa.">
+              </div>
+
+              <button type="submit" class="btn-secondary" style="width: 100%;">
+                <i class="fas fa-save"></i> Adicionar ao Catálogo
+              </button>
+            </form>
+          </div>
+
+          <!-- CARD: NOVO VENDEDOR -->
+          <div class="card-panel">
+            <h3 class="card-title">
+              <i class="fas fa-user-plus"></i> Cadastrar Novo Vendedor
+            </h3>
+
+            <form id="sellerForm">
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="newSellerName">Nome do Vendedor <span class="required">*</span></label>
+                <input type="text" id="newSellerName" class="input-ctrl" placeholder="Ex: Rodrigo Rodrigues" required>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <label for="newSellerRole">Cargo / Função</label>
+                <input type="text" id="newSellerRole" class="input-ctrl" placeholder="Ex: Consultor Especialista">
+              </div>
+
+              <div class="form-grid-2" style="margin-bottom: 1rem;">
+                <div class="form-group">
+                  <label for="newSellerPhone">WhatsApp</label>
+                  <input type="tel" id="newSellerPhone" class="input-ctrl" placeholder="5514996321001">
+                </div>
+                <div class="form-group">
+                  <label for="newSellerEmail">E-mail</label>
+                  <input type="email" id="newSellerEmail" class="input-ctrl" placeholder="rodrigo@rrturismo.com.br">
+                </div>
+              </div>
+
+              <button type="submit" class="btn-secondary" style="width: 100%;">
+                <i class="fas fa-user-check"></i> Cadastrar Vendedor
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- COLUNA DIREITA: CATÁLOGO ORGANIZADO COM BUSCA & EDIÇÃO -->
+        <div class="cadastros-right-col">
+          
+          <!-- CARD DE CATÁLOGO ORGANIZADO -->
+          <div class="card-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <h3 class="card-title" style="margin-bottom: 0;">
+                <i class="fas fa-boxes-packing"></i> Catálogo de Serviços
+              </h3>
+            </div>
+
+            <!-- BARRA DE PESQUISA E FILTRO -->
+            <div class="catalog-filter-bar">
+              <div style="flex: 1; position: relative;">
+                <i class="fas fa-search filter-icon"></i>
+                <input type="text" id="productSearchInput" class="input-ctrl filter-input" placeholder="Buscar por nome ou descrição...">
+              </div>
+              <select id="productCategoryFilter" class="select-ctrl filter-select">
+                <option value="all">Todas as Categorias</option>
+                <option value="Vistos & Imigração">Vistos &amp; Imigração</option>
+                <option value="Documentação">Documentação</option>
+                <option value="Passagens">Passagens Aéreas</option>
+                <option value="Recepção">Recepção / Translado</option>
+                <option value="Seguros">Seguro Viagem</option>
+                <option value="Hospedagem">Hospedagem &amp; Arrendamento</option>
+                <option value="Pacotes VIP">Pacotes VIP</option>
+              </select>
+            </div>
+
+            <!-- TABELA ORGANIZADA DE PRODUTOS COM BOTÃO EDITAR -->
+            <div class="table-responsive" style="max-height: 480px; overflow-y: auto;">
+              <table class="catalog-table">
+                <thead>
+                  <tr>
+                    <th>Serviço</th>
+                    <th>Categoria</th>
+                    <th style="text-align: right;">Preço</th>
+                    <th style="text-align: right; width: 120px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTableBody">
+                  <!-- Renderizado via JS -->
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+
+          <!-- CARD DA EQUIPE DE VENDEDORES -->
+          <div class="card-panel" style="margin-top: 1.5rem;">
+            <h3 class="card-title">
+              <i class="fas fa-users"></i> Equipe de Vendedores
+            </h3>
+            <div id="sellersListContainer" class="sellers-grid-container">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ABA 3: HISTÓRICO -->
+    <section class="tab-content" id="tab-historico">
+      <div class="card-panel">
+        <h3 class="card-title">
+          <i class="fas fa-clock-rotate-left"></i> Orçamentos Emitidos
+        </h3>
+
+        <div class="table-responsive">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Data</th>
+                <th>Cliente</th>
+                <th>Vendedor</th>
+                <th>Valor Total</th>
+                <th style="text-align: right;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: PREVIEW DO ORÇAMENTO TIMBRADO -->
+  <div class="modal-backdrop" id="quoteModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-file-invoice"></i> Espelho do Orçamento - RR Turismo</h3>
+        <button class="btn-close-modal" id="btnCloseModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div id="quotePaperContent">
+          <!-- Conteúdo do Orçamento em JS -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" id="btnCopyQuoteText">
+          <i class="fas fa-copy"></i> Copiar Texto
+        </button>
+        <button type="button" class="btn-whatsapp-action" id="btnWhatsappQuote">
+          <i class="fab fa-whatsapp"></i> Enviar no WhatsApp
+        </button>
+        <button type="button" class="btn-primary" id="btnPrintQuote" style="width: auto;">
+          <i class="fas fa-print"></i> Imprimir / PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: EDIÇÃO DE PRODUTO / SERVIÇO -->
+  <div class="modal-backdrop" id="editProductModal">
+    <div class="modal-box" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-pen-to-square"></i> Editar Serviço do Catálogo</h3>
+        <button class="btn-close-modal" id="btnCloseEditModal">&times;</button>
+      </div>
+
+      <form id="editProductForm">
+        <div class="modal-body" style="background: #FFFFFF;">
+          <input type="hidden" id="editProdId">
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="editProdName">Nome do Serviço <span class="required">*</span></label>
+            <input type="text" id="editProdName" class="input-ctrl" required>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom: 1rem;">
+            <div class="form-group">
+              <label for="editProdCat">Categoria</label>
+              <select id="editProdCat" class="select-ctrl">
+                <option value="Vistos & Imigração">Vistos &amp; Imigração</option>
+                <option value="Documentação">Documentação</option>
+                <option value="Passagens">Passagens Aéreas</option>
+                <option value="Recepção">Recepção / Translado</option>
+                <option value="Seguros">Seguro Viagem</option>
+                <option value="Hospedagem">Hospedagem &amp; Arrendamento</option>
+                <option value="Pacotes VIP">Pacotes VIP</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="editProdPrice">Valor Padrão (R$) <span class="required">*</span></label>
+              <input type="number" id="editProdPrice" class="input-ctrl" step="10" min="0" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="editProdDesc">Descrição Resumida</label>
+            <textarea id="editProdDesc" class="textarea-ctrl" rows="3" placeholder="Detalhamento das etapas..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" id="btnCancelEditModal">Cancelar</button>
+          <button type="submit" class="btn-primary" style="width: auto;">
+            <i class="fas fa-check"></i> Salvar Alterações
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONTAINER DE IMPRESSÃO ISOLADO -->
+  <div id="printArea" class="print-area-only"></div>
+
+  <!-- Script JS -->
+  <script src="js/orcamento.js"></script>
+</body>
+</html>
